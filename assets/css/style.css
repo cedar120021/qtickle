@@ -55,3 +55,229 @@ body {
 #mobile-nav.open {
     max-height: 200px; /* Adjust as needed to fit content */
 }
+
+
+/* Image Styling */
+        .gallery-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover; /* Ensures images cover the area without distortion */
+            cursor: pointer;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .gallery-image:hover {
+            transform: scale(1.05);
+            border-color: #007bff; /* Highlight on hover */
+        }
+
+        /* Modal Background */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* High z-index to be on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.8); /* Darker overlay */
+            backdrop-filter: blur(8px); /* Optional: Frosted glass effect */
+            -webkit-backdrop-filter: blur(8px); /* For Safari */
+            justify-content: center; /* Center modal content horizontally */
+            align-items: center; /* Center modal content vertically */
+        }
+
+        Okay, this is a fantastic enhancement! Adding navigation arrows for images within the modal makes it a full-fledged image gallery or lightbox.
+
+To implement this, we'll need to:
+
+Keep track of the currently displayed image: We'll need an index or a reference to the image in the gallery that is currently open in the modal.
+
+Add Left and Right arrow elements: These will be placed within the modal and styled.
+
+Implement click handlers for the arrows: When clicked, these handlers will update the src and caption of the modal's image/caption based on the next/previous image in our gallery.
+
+Handle edge cases: What happens when you're at the first or last image?
+
+Here's the updated code, building upon our last successful modal structure:
+
+Revised HTML (Adding Arrow Buttons)
+We'll add two <span> elements for the left and right arrows within the modal container, positioned to overlay the dark background but be clickable.
+
+HTML
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Modal with Navigation</title>
+    <style>
+        /* (Keep your existing body and gallery-image styles) */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            gap: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .gallery-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .gallery-image:hover {
+            transform: scale(1.05);
+            border-color: #007bff;
+        }
+
+        /* Modal Background */
+        .modal {
+            display: none; /* <-- CRITICAL FIX: This hides the modal on page load */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            /* Important: Keep these for when JS *does* set display to flex */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal Content (The White Frame) */
+        .modal-content {
+            background-color: #fefefe;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            position: relative; /* Positioning context for close button */
+            animation-name: animatetop;
+            animation-duration: 0.4s;
+
+            display: flex;
+            flex-direction: column;
+
+            width: 90%;
+            max-width: 700px;
+            height: auto;
+            max-height: 95vh;
+            box-sizing: border-box;
+        }
+
+        /* Animation for modal appearance - unchanged */
+        @keyframes animatetop {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Close Button - unchanged positioning */
+        .close-button {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            z-index: 1001;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        /* Navigation Arrows (NEW CSS) */
+        .prev-next-button {
+            cursor: pointer;
+            position: absolute;
+            top: 50%; /* Center vertically */
+            transform: translateY(-50%); /* Adjust for perfect centering */
+            width: auto;
+            padding: 16px;
+            color: white;
+            font-weight: bold;
+            font-size: 30px;
+            transition: 0.6s ease;
+            border-radius: 0 3px 3px 0;
+            user-select: none;
+            -webkit-user-select: none;
+            background-color: rgba(0,0,0,0.5); /* Semi-transparent background */
+            z-index: 1001; /* Ensure arrows are above modal content */
+            opacity: 0.8;
+        }
+
+        .prev-next-button:hover {
+            background-color: rgba(0,0,0,0.8);
+            opacity: 1;
+        }
+
+        /* Position the specific arrows */
+        #prevButton {
+            left: 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        #nextButton {
+            right: 0;
+            border-radius: 8px 0 0 8px;
+        }
+
+        /* Modal Body (Contains Image and Caption - This is the scrollable part) - unchanged */
+        .modal-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px;
+            padding-top: 50px; /* Push content down to clear the close button */
+            text-align: center;
+        }
+
+        /* Image inside modal (The actual picture) - unchanged */
+        .modal-image {
+            max-width: 100%;
+            max-height: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: 5px;
+        }
+
+        /* Modal Caption - unchanged */
+        .modal-caption {
+            margin-top: 15px;
+            font-size: 1.1em;
+            color: #000;
+            text-align: center;
+            padding-bottom: 5px;
+        }
