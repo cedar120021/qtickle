@@ -330,3 +330,9 @@ header {
 .remove-item-button:hover {
     background-color: #dc2626; /* red-600 */
 }
+
+section[id] { /* Apply to all sections that have an ID (which are your scroll targets) */
+    scroll-margin-top: 5rem; /* Adjust this value based on your header's height */
+    /* If your header is exactly 64px (h-16), 4rem (64px) might be perfect.
+       5rem (80px) provides a bit more padding. Adjust as needed. */
+}

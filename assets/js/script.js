@@ -334,3 +334,74 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+// Function to validate email format
+    function isValidEmail(email) {
+        // A more robust regex for email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+    }
+
+// --- Contact Form Submission & Notification ---
+    const contactForm = document.querySelector('#contact form'); // Select the form within the contact section
+    const messageNotificationModal = document.getElementById('messageNotificationModal');
+    const messageNotificationContent = document.getElementById('messageNotificationContent');
+    const closeMessageNotificationButton = document.getElementById('closeMessageNotification');
+
+    if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent the default form submission (page reload)
+
+            // Get form data
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            // In a real application, you would send this data to your backend
+            // Example:
+            /*
+            try {
+                const response = await fetch('/api/contact', { // Replace with your actual backend endpoint
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, message }),
+                });
+
+                if (response.ok) {
+                    showMessageNotification('Message Sent Successfully!');
+                    contactForm.reset(); // Clear the form fields
+                } else {
+                    const errorData = await response.json();
+                    showMessageNotification(`Failed to send message: ${errorData.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Contact form submission error:', error);
+                showMessageNotification('An error occurred. Please try again later.');
+            }
+            */
+
+            // Simulate a successful submission for now
+            //showMessageNotification('Message Sent Successfully!');
+            showMessageNotification('Submission Error');
+            contactForm.reset(); // Clear the form fields
+
+            // Optional: Auto-hide the modal after a few seconds
+            setTimeout(() => {
+                messageNotificationModal.classList.add('hidden');
+            }, 3000); // Hide after 3 seconds
+        });
+    }
+
+    if (closeMessageNotificationButton) {
+        closeMessageNotificationButton.addEventListener('click', () => {
+            messageNotificationModal.classList.add('hidden');
+        });
+    }
+
+    function showMessageNotification(message) {
+        messageNotificationContent.textContent = message;
+        messageNotificationModal.classList.remove('hidden'); // Show the modal
+    }
