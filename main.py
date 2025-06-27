@@ -15,7 +15,7 @@ CORS(app, resources={r"/create-checkout-session": {"origins": "*"}})
 # Replace with your actual Stripe Secret Key
 # It's highly recommended to load this from environment variables
 # For example: stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-stripe.api_key = 'sk_test_51ReT76CL22MlIYKBX3Qn2eVvNuu8yDbDfZbt7sFqQnCXh7UtviMFMgwxomFvuEBAGqTEsR2J4vfKccNdRBtQcQQk0067D7vkK8' # <--- REPLACE THIS with your sk_test_... key
+stripe.api_key = 'YOUR_STRIPE_SECRET_KEY' # <--- REPLACE THIS with your sk_test_... key
 
 # Define your frontend URLs for success and cancel redirects
 # Make sure these match where your index.html file is served from (e.g., http://localhost:8000)
