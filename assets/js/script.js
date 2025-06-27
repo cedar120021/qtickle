@@ -1,18 +1,23 @@
 // script.js
 
+// Initialize Stripe with your publishable key.
+// Replace 'YOUR_STRIPE_PUBLISHABLE_KEY' with your actual Stripe publishable key.
+// You can find this in your Stripe Dashboard (Developers -> API keys).
+// For development, use a test publishable key (starts with pk_test_).
+const stripe = Stripe('pk_test_51ReT76CL22MlIYKBye392gwdQCuipAEusNp5wdJUUke0u6UyrorPKRTwDAZs6rsoNXgnHgStXuGjTUKO5xuVk7c6000Noc83Jt');
+
+
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Mobile Navigation Toggle ---
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileNav = document.getElementById('mobile-nav');
 
     if (mobileMenuButton && mobileNav) {
         mobileMenuButton.addEventListener('click', () => {
-            // Toggle the 'hidden' class for a simpler show/hide,
-            // or toggle 'open' for a CSS transition effect (as set up in style.css).
             mobileNav.classList.toggle('hidden');
-            mobileNav.classList.toggle('open'); // For CSS transition
+            mobileNav.classList.toggle('open');
         });
 
-        // Close mobile menu when a navigation link is clicked
         const mobileNavLinks = mobileNav.querySelectorAll('a');
         mobileNavLinks.forEach(link => {
             link.addEventListener('click', () => {
@@ -22,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Smooth scrolling for anchor links (optional, but good for UX)
+    // --- Smooth Scrolling for Anchor Links ---
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -32,87 +37,300 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
-});
 
+    // --- Cart Functionality ---
+    const cartCountSpan = document.getElementById('cart-count');
+    const addToCartButtons = document.querySelectorAll('.add-to-cart');
+    const cartNotification = document.getElementById('cart-notification');
+    const cartModal = document.getElementById('cartModal');
+    const closeCartModalButton = document.getElementById('closeCartModal');
+    const cartButton = document.getElementById('cart-button'); // The cart icon button
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartTotalSpan = document.getElementById('cart-total');
+    const checkoutButton = document.getElementById('checkoutButton'); // Get checkout button
 
-//Image Modal Window Actions
-// Get the modal and its components
-        const modal = document.getElementById("imageModal");
-        const modalImage = document.getElementById("modalImage");
-        const modalCaption = document.getElementById("modalCaption");
-        const closeButton = document.querySelector(".close-button");
-        const prevButton = document.getElementById("prevButton");
-        const nextButton = document.getElementById("nextButton");
+    let cart = JSON.parse(localStorage.getItem('shoppingCart')) || []; // Load cart from localStorage or initialize empty array
 
-        // Get all gallery images (NodeList)
-        const galleryImages = document.querySelectorAll(".gallery-image");
+    // Function to update cart count display
+    function updateCartCount() {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCountSpan.textContent = totalItems;
+    }
 
-        // Variable to keep track of the currently displayed image's index
-        let currentImageIndex = 0;
+    // Function to save cart to localStorage
+    function saveCart() {
+        localStorage.setItem('shoppingCart', JSON.stringify(cart));
+        updateCartCount(); // Always update count after saving
+    }
 
-        // Function to update the modal content based on the current image index
-        function updateModalContent() {
-            const image = galleryImages[currentImageIndex];
-            if (image) {
-                modalImage.src = image.dataset.largeSrc;
-                modalCaption.textContent = image.dataset.caption;
+    // Function to render cart items in the modal
+    function renderCart() {
+        cartItemsContainer.innerHTML = ''; // Clear previous items
+        let total = 0;
 
-                // Hide/show arrows at ends
-                prevButton.style.display = (currentImageIndex === 0) ? "none" : "block";
-                nextButton.style.display = (currentImageIndex === galleryImages.length - 1) ? "none" : "block";
-            }
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center">Your cart is empty.</p>';
+            checkoutButton.disabled = true; // Disable checkout if cart is empty
+        } else {
+            checkoutButton.disabled = false; // Enable checkout if cart has items
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+
+                const cartItemDiv = document.createElement('div');
+                cartItemDiv.classList.add('cart-item');
+                cartItemDiv.innerHTML = `
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">$${item.price.toFixed(2)} each</div>
+                    </div>
+                    <div class="cart-item-quantity-control">
+                        <button class="decrease-quantity" data-product-id="${item.id}">-</button>
+                        <span class="cart-item-quantity">${item.quantity}</span>
+                        <button class="increase-quantity" data-product-id="${item.id}">+</button>
+                    </div>
+                    <button class="remove-item-button" data-product-id="${item.id}">Remove</button>
+                `;
+                cartItemsContainer.appendChild(cartItemDiv);
+            });
         }
+        cartTotalSpan.textContent = `$${total.toFixed(2)}`;
 
-        // When a gallery image is clicked, open the modal and set the initial image
-        galleryImages.forEach((image, index) => {
-            image.addEventListener("click", function() {
-                currentImageIndex = index; // Set the index of the clicked image
-                updateModalContent();       // Load its content
-                modal.style.display = "flex"; // Show the modal
+        // Add event listeners for quantity controls and remove buttons after rendering
+        document.querySelectorAll('.decrease-quantity').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const productId = event.target.dataset.productId;
+                updateQuantity(productId, -1);
             });
         });
 
-        // Click handler for Previous button
+        document.querySelectorAll('.increase-quantity').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const productId = event.target.dataset.productId;
+                updateQuantity(productId, 1);
+            });
+        });
+
+        document.querySelectorAll('.remove-item-button').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const productId = event.target.dataset.productId;
+                removeItem(productId);
+            });
+        });
+    }
+
+    // Function to add/update item in cart
+    function addItemToCart(id, name, price) {
+        const existingItemIndex = cart.findIndex(item => item.id === id);
+
+        if (existingItemIndex > -1) {
+            cart[existingItemIndex].quantity++;
+        } else {
+            cart.push({ id, name, price, quantity: 1 });
+        }
+        saveCart();
+        showNotification(`${name} added to cart!`);
+    }
+
+    // Function to update item quantity
+    function updateQuantity(id, change) {
+        const itemIndex = cart.findIndex(item => item.id === id);
+        if (itemIndex > -1) {
+            cart[itemIndex].quantity += change;
+            if (cart[itemIndex].quantity <= 0) {
+                cart.splice(itemIndex, 1); // Remove if quantity drops to 0 or less
+            }
+            saveCart();
+            renderCart(); // Re-render cart after quantity change
+        }
+    }
+
+    // Function to remove item from cart
+    function removeItem(id) {
+        cart = cart.filter(item => item.id !== id);
+        saveCart();
+        renderCart(); // Re-render cart after removal
+    }
+
+    // Function to show notification (from previous step)
+    function showNotification(message) {
+        cartNotification.textContent = message;
+        cartNotification.classList.add('show');
+        setTimeout(() => {
+            cartNotification.classList.remove('show');
+        }, 2000);
+    }
+
+    // Event listener for Add to Cart buttons
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            const clickedButton = event.currentTarget;
+            const productId = clickedButton.dataset.productId;
+            const productName = clickedButton.dataset.productName;
+            const price = parseFloat(clickedButton.dataset.price);
+            addItemToCart(productId, productName, price);
+        });
+    });
+
+    // Event listeners for Cart Modal
+    if (cartButton && cartModal) {
+        cartButton.addEventListener('click', () => {
+            renderCart(); // Render cart items every time modal is opened
+            cartModal.style.display = 'flex';
+        });
+    }
+
+    if (closeCartModalButton && cartModal) {
+        closeCartModalButton.addEventListener('click', () => {
+            cartModal.style.display = 'none';
+        });
+    }
+
+    if (cartModal) {
+        window.addEventListener('click', (event) => {
+            if (event.target === cartModal) {
+                cartModal.style.display = 'none';
+            }
+        });
+    }
+
+    // --- Stripe Checkout Integration ---
+    if (checkoutButton) {
+        checkoutButton.addEventListener('click', async () => {
+            if (cart.length === 0) {
+                showNotification('Your cart is empty. Add items before checking out.');
+                return;
+            }
+
+            // Transform cart items into Stripe-friendly line_items
+            const lineItems = cart.map(item => ({
+                price_data: {
+                    currency: 'usd', // IMPORTANT: Set your currency
+                    product_data: {
+                        name: item.name,
+                        // If you have product images, you can add:
+                        // images: ['URL_TO_PRODUCT_IMAGE'],
+                    },
+                    unit_amount: Math.round(item.price * 100), // Price in cents
+                },
+                quantity: item.quantity,
+            }));
+
+            // ** IMPORTANT: This is where you would make a fetch request to your BACKEND. **
+            // The backend would then use your Stripe Secret Key to create the Checkout Session.
+            // For this client-side demo, we'll simulate a fetch call.
+            try {
+                // Replace '/create-checkout-session' with your actual backend endpoint
+                const response = await fetch('http://localhost:5000/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ lineItems }),
+                });
+
+                const session = await response.json();
+
+                if (response.ok) {
+                    // Redirect to Stripe Checkout
+                    const result = await stripe.redirectToCheckout({
+                        sessionId: session.id,
+                    });
+
+                    if (result.error) {
+                        console.error('Stripe redirect error:', result.error.message);
+                        showNotification(`Checkout error: ${result.error.message}`);
+                    }
+                } else {
+                    console.error('Error creating checkout session:', session.error);
+                    showNotification(`Error: ${session.error}`);
+                }
+            } catch (error) {
+                console.error('Network or other error during checkout:', error);
+                showNotification('An error occurred during checkout. Please try again.');
+            }
+        });
+    }
+
+
+    // Initialize cart count on page load
+    updateCartCount();
+
+    // --- Image Modal Window Actions (existing code) ---
+    const imageModal = document.getElementById("imageModal");
+    const modalImage = document.getElementById("modalImage");
+    const modalCaption = document.getElementById("modalCaption");
+    const imageModalCloseButton = document.querySelector("#imageModal .close-button");
+    const prevButton = document.getElementById("prevButton");
+    const nextButton = document.getElementById("nextButton");
+
+    const galleryImages = document.querySelectorAll(".gallery-image");
+    let currentImageIndex = 0;
+
+    function updateModalContent() {
+        const image = galleryImages[currentImageIndex];
+        if (image) {
+            modalImage.src = image.dataset.largeSrc;
+            modalCaption.textContent = image.dataset.caption;
+
+            prevButton.style.display = (currentImageIndex === 0) ? "none" : "block";
+            nextButton.style.display = (currentImageIndex === galleryImages.length - 1) ? "none" : "block";
+        }
+    }
+
+    galleryImages.forEach((image, index) => {
+        image.addEventListener("click", function() {
+            currentImageIndex = index;
+            updateModalContent();
+            imageModal.style.display = "flex";
+        });
+    });
+
+    if (prevButton) {
         prevButton.addEventListener("click", function(event) {
-            event.stopPropagation(); // Prevent modal from closing if clicked on background
+            event.stopPropagation();
             if (currentImageIndex > 0) {
                 currentImageIndex--;
                 updateModalContent();
             }
         });
+    }
 
-        // Click handler for Next button
+    if (nextButton) {
         nextButton.addEventListener("click", function(event) {
-            event.stopPropagation(); // Prevent modal from closing if clicked on background
+            event.stopPropagation();
             if (currentImageIndex < galleryImages.length - 1) {
                 currentImageIndex++;
                 updateModalContent();
             }
         });
+    }
 
-        // When the user clicks on the close button, hide the modal
-        closeButton.addEventListener("click", function() {
-            modal.style.display = "none";
+    if (imageModalCloseButton) {
+        imageModalCloseButton.addEventListener("click", function() {
+            imageModal.style.display = "none";
         });
+    }
 
-        // When the user clicks anywhere outside of the modal content (but not on arrows), hide the modal
-        window.addEventListener("click", function(event) {
-            if (event.target === modal) {
-                modal.style.display = "none";
+    window.addEventListener("click", function(event) {
+        if (event.target === imageModal) {
+            imageModal.style.display = "none";
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            if (imageModal && imageModal.style.display === 'flex') {
+                imageModal.style.display = 'none';
+            } else if (cartModal && cartModal.style.display === 'flex') {
+                cartModal.style.display = 'none';
             }
-        });
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                modal.style.display = 'none';
-            } else if (modal.style.display === "flex") { // Only navigate if modal is open
-                if (event.key === 'ArrowLeft') {
-                    // Simulate a click on the previous button
-                    prevButton.click();
-                } else if (event.key === 'ArrowRight') {
-                    // Simulate a click on the next button
-                    nextButton.click();
-                }
+        } else if (imageModal && imageModal.style.display === "flex") {
+            if (event.key === 'ArrowLeft') {
+                if (prevButton) prevButton.click();
+            } else if (event.key === 'ArrowRight') {
+                if (nextButton) nextButton.click();
             }
-        });
+        }
+    });
+});
