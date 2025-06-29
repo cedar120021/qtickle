@@ -1,17 +1,17 @@
 {
   "version": 2,
-    "builds": [
-        {
-            "src": "main.py",
-            "use": "@vercel/python"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "/",
-            "methods": ["POST", "OPTIONS"]
-        }
+  "builds": [
+    {
+      "src": "main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/create-checkout-session",
+      "dest": "/main.py",
+      "methods": ["POST", "OPTIONS"]
+    }
   ],
   "headers": [
     {
@@ -25,4 +25,3 @@
     }
   ]
 }
-
