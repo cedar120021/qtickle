@@ -10,12 +10,7 @@
     {
       "src": "/create-checkout-session",
       "dest": "/main.py",
-      "methods": ["POST", "OPTIONS"]
-    }
-  ],
-  "headers": [
-    {
-      "source": "/create-checkout-session",
+      "methods": ["POST", "OPTIONS"],
       "headers": [
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         { "key": "Access-Control-Allow-Origin", "value": "https://www.qtickle.com" },
