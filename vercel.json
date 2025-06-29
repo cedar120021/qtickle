@@ -1,5 +1,5 @@
 {
-    "version": 2,
+  "version": 2,
     "builds": [
         {
             "src": "main.py",
@@ -15,7 +15,7 @@
   ],
   "headers": [
     {
-      "source": "/create-checkout-session",  // <--- THIS IS THE CHANGED LINE
+      "source": "/create-checkout-session",
       "headers": [
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         { "key": "Access-Control-Allow-Origin", "value": "https://www.qtickle.com" },
@@ -25,3 +25,4 @@
     }
   ]
 }
+
