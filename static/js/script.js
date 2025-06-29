@@ -53,40 +53,85 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeCartModalButton = document.getElementById('closeCartModal');
     const cartButton = document.getElementById('cart-button'); // The cart icon button
     const cartItemsContainer = document.getElementById('cart-items');
-    const cartTotalSpan = document.getElementById('cart-total');
+
+    // New shipping and total display elements - RE-ADDED
+    const shippingZipCodeInput = document.getElementById('shipping-zip-code');
+    const shippingCountrySelect = document.getElementById('shipping-country');
+    const cartSubtotalSpan = document.getElementById('cart-subtotal');
+    const cartShippingEstimateSpan = document.getElementById('cart-shipping-estimate');
+    const cartGrandTotalSpan = document.getElementById('cart-grand-total');
+
     const checkoutButton = document.getElementById('checkoutButton'); // Get checkout button
 
     let cart = JSON.parse(localStorage.getItem('shoppingCart')) || []; // Load cart from localStorage or initialize empty array
 
-    // Function to update cart count display (used internally by saveCart)
-    function updateCartCount() {
+    // Function to calculate a client-side *estimated* shipping cost - RE-ADDED
+    // This is for display purposes only. Actual shipping will be calculated server-side.
+    function getEstimatedShippingCost(countryCode, subtotal) {
+        // Implement very basic, client-side shipping logic for display
+        if (subtotal === 0) return 0;
+
+        switch (countryCode) {
+            case 'US':
+                return 5.00; // Flat rate for US
+            case 'CA':
+                return 10.00; // Flat rate for Canada
+            case 'MX':
+                return 12.00; // Flat rate for Mexico
+            case 'GB':
+                return 15.00; // Flat rate for UK
+            case 'AU':
+                return 18.00; // Flat rate for Australia
+            default:
+                return 20.00; // Default international shipping
+        }
+    }
+
+
+    // Function to update cart count display and all totals - MODIFIED
+    function updateCartSummary() {
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
         cartCountSpan.textContent = totalItems;
+
+        let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        cartSubtotalSpan.textContent = `$${subtotal.toFixed(2)}`;
+
+        // Only calculate shipping if inputs exist (i.e., cart modal is loaded)
+        let estimatedShipping = 0;
+        if (shippingCountrySelect) {
+            const selectedCountry = shippingCountrySelect.value;
+            estimatedShipping = getEstimatedShippingCost(selectedCountry, subtotal);
+            cartShippingEstimateSpan.textContent = `$${estimatedShipping.toFixed(2)}`;
+        }
+
+
+        const grandTotal = subtotal + estimatedShipping;
+        cartGrandTotalSpan.textContent = `$${grandTotal.toFixed(2)}`;
+
+        // Disable checkout if cart is empty
+        if (cart.length === 0) {
+            checkoutButton.disabled = true;
+            checkoutButton.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            checkoutButton.disabled = false;
+            checkoutButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
     }
 
     // Function to save cart to localStorage
     function saveCart() {
         localStorage.setItem('shoppingCart', JSON.stringify(cart));
-        updateCartCount(); // Always update count after saving
+        updateCartSummary(); // Always update summary after saving
     }
 
-    // Function to render cart items in the modal (the main one)
+    // Function to render cart items in the modal - MODIFIED
     function renderCart() {
         cartItemsContainer.innerHTML = ''; // Clear previous items
-        let total = 0;
 
         if (cart.length === 0) {
             cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center">Your cart is empty.</p>';
-            checkoutButton.disabled = true; // Disable checkout if cart is empty
-            checkoutButton.classList.add('opacity-50', 'cursor-not-allowed'); // Add disabled styling
         } else {
-            checkoutButton.disabled = false; // Enable checkout if cart has items
-            checkoutButton.classList.remove('opacity-50', 'cursor-not-allowed'); // Remove disabled styling
-
             cart.forEach(item => {
-                const itemTotal = item.price * item.quantity;
-                total += itemTotal;
-
                 const cartItemDiv = document.createElement('div');
                 cartItemDiv.classList.add('cart-item');
                 cartItemDiv.innerHTML = `
@@ -104,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cartItemsContainer.appendChild(cartItemDiv);
             });
         }
-        cartTotalSpan.textContent = `$${total.toFixed(2)}`;
+        updateCartSummary(); // Update totals after rendering cart items
 
         // Add event listeners for quantity controls and remove buttons after rendering
         document.querySelectorAll('.decrease-quantity').forEach(button => {
@@ -165,7 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to show notification (used for simple, temporary messages)
     function showNotification(message) {
         if (cartNotification) {
-            cartNotification.textContent = message;
+            // Updated to use specific spans within the notification
+            document.getElementById('cart-notification-icon').textContent = '🛒'; // Cart icon
+            document.getElementById('cart-notification-message').textContent = message;
             cartNotification.classList.add('show');
             setTimeout(() => {
                 cartNotification.classList.remove('show');
@@ -211,6 +258,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 body.classList.remove('overflow-hidden');
             }
         });
+    }
+
+    // Event listeners for shipping inputs to update totals - RE-ADDED
+    if (shippingZipCodeInput) {
+        shippingZipCodeInput.addEventListener('input', updateCartSummary);
+    }
+    if (shippingCountrySelect) {
+        shippingCountrySelect.addEventListener('change', updateCartSummary);
     }
 
 
@@ -367,28 +422,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Stripe Checkout Integration ---
-
+    let BACKEND_ORIGIN;
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        // Local development backend URL
-        // Replace with the URL of your local Python Flask backend (e.g., 'http://127.0.0.1:4242')
-        BACKEND_ORIGIN = window.location.origin;
+        BACKEND_ORIGIN = 'http://127.0.0.1:5000'; // Flask local server is on port 5000
     } else {
-        // Hosted (production) backend URL
-        // Replace with the actual URL Vercel provides after deployment (e.g., 'https://your-vercel-backend-url.vercel.app')
-        BACKEND_ORIGIN = 'https://qtickle.vercel.app';
+        BACKEND_ORIGIN = 'https://qtickle.vercel.app'; // Your deployed Vercel backend URL
     }
 
-    const CHECKOUT_SESSION_URL = `${BACKEND_ORIGIN}/create-checkout-session`;
+    const CHECKOUT_SESSION_ENDPOINT = '/create-checkout-session'; // Your endpoint path
+    const CHECKOUT_SESSION_URL = `${BACKEND_ORIGIN}${CHECKOUT_SESSION_ENDPOINT}`;
 
     // Define SUCCESS_URL and CANCEL_URL.
     // These are passed to your backend, and your backend will ultimately redirect to them.
-    const SUCCESS_URL = `${BACKEND_ORIGIN}/?payment=success`;
-    const CANCEL_URL = `${BACKEND_ORIGIN}/?payment=cancelled`;
+    // Ensure these match your backend's expected URLs.
+    const SUCCESS_URL = `${BACKEND_ORIGIN}/stripe-success-handler`; // Backend handles redirect to frontend
+    const CANCEL_URL = `${BACKEND_ORIGIN}/index.html?payment=cancelled`; // Backend might redirect directly or via /cancel-handler
 
     if (checkoutButton) {
         checkoutButton.addEventListener('click', async () => {
             if (cart.length === 0) {
                 showMessageModal('Your cart is empty', 'Add items before checking out.', 'neutral');
+                return;
+            }
+
+            // Get shipping details - RE-ADDED
+            const shippingZipCode = shippingZipCodeInput.value.trim();
+            const shippingCountry = shippingCountrySelect.value;
+
+            if (!shippingZipCode || shippingZipCode.length < 3) { // Basic validation
+                showMessageModal('Shipping Address Required', 'Please enter a valid zip code.', 'error');
                 return;
             }
 
@@ -399,10 +461,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Transform cart items into Stripe-friendly line_items
             const lineItems = cart.map(item => ({
                 price_data: {
-                    currency: 'usd', // IMPORTANT: Set your currency
+                    currency: 'usd',
                     product_data: {
                         name: item.name,
-                        images: [item.image], // Pass product image URL
+                        images: [item.image],
                     },
                     unit_amount: Math.round(item.price * 100), // Price in cents
                 },
@@ -410,6 +472,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
 
             try {
+                // Show a loading message while waiting for the backend
+                showMessageModal('Processing Order', 'Please wait while we prepare your checkout...', 'neutral');
+
+
                 const response = await fetch(CHECKOUT_SESSION_URL, {
                     method: 'POST',
                     headers: {
@@ -417,17 +483,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     body: JSON.stringify({
                         lineItems,
+                        shippingAddress: { // Send shipping address details to backend - RE-ADDED
+                            zip_code: shippingZipCode,
+                            country: shippingCountry
+                        },
                         success_url: SUCCESS_URL,
                         cancel_url: CANCEL_URL,
                     }),
                 });
 
                 const session = await response.json();
+                closeMessageModal(); // Close loading message
+
 
                 if (response.ok) {
                     // Redirect to Stripe Checkout
                     const result = await stripe.redirectToCheckout({
-                        sessionId: session.id,
+                        sessionId: session.id, // Changed from sessionId to id to match backend
                     });
 
                     if (result.error) {
@@ -440,14 +512,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error('Network or other error during checkout:', error);
-                showMessageModal('Network Error', 'An error occurred during checkout. Please try again.', 'error');
+                closeMessageModal(); // Close loading message even on network error
+                showMessageModal('Network Error', 'An error occurred during checkout. Please try again. Ensure your backend is running and accessible.', 'error');
             }
         });
     }
 
 
     // Initialize cart count on page load
-    updateCartCount();
+    updateCartSummary(); // Changed to updateCartSummary to get full totals on load
 
     // --- Global Keyboard Event Listener (for Esc key) ---
     document.addEventListener('keydown', function(event) {
@@ -479,13 +552,13 @@ document.addEventListener('DOMContentLoaded', () => {
         showMessageModal('Payment Successful!', 'Thank you for your purchase. Your order has been placed.', 'success');
         localStorage.removeItem('shoppingCart'); // Clear cart after successful payment
         cart = []; // Update local cart array
-        updateCartCount(); // Refresh cart count to show 0 items
+        updateCartSummary(); // Refresh cart count and totals to show 0 items
     } else if (paymentStatus === 'cancelled') {
         showMessageModal('Payment Cancelled', 'Your payment was cancelled. You can continue shopping.', 'error');
     }
 
     // --- Initial load: Update cart display ---
     renderCart(); // Call renderCart to populate cart on initial load
-    updateCartCount(); // Ensure count is updated on initial load
+    updateCartSummary(); // Ensure count and all totals are updated on initial load
 
 });
