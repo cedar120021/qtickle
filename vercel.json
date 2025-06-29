@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/*.py",
+      "src": "main.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/api/create-checkout-session",
-      "dest": "/api/create-checkout-session.py",
+      "dest": "/main.py",
       "methods": ["POST", "OPTIONS"]
     }
   ],
