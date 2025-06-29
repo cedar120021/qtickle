@@ -286,7 +286,6 @@ def validate_captcha():
 
 
 
-
 def send_email(name, email, message, recaptcha_result):
     """
     Sends an email containing the form data and reCAPTCHA response.
