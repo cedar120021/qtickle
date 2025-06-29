@@ -202,7 +202,7 @@ app.secret_key = os.getenv("mafteah_sod")
 
 
 CORS(app, resources={r"/api/*": {"origins": "https://www.qtickle.com"}})
-
+#CORS(app, resources={r"/validate-captcha": {"origins": "https://www.prepforinterviews.com"}})
 
 RECAPTCHA_SECRET_KEY = "6LcXxroqAAAAAGeX9BkQ5oAxyKeeyoGPpesYUQkL"
 GMAIL_USER = os.getenv("doar_ktovet")
