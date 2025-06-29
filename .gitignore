@@ -2,3 +2,6 @@
 .env
 venv/
 venv_py311/
+misc.xml
+.gitignore
+Qtickle.iml

@@ -317,6 +317,7 @@ def send_email(name, email, message, recaptcha_result):
         server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())  # Send email
 
 
+
 if __name__ == '__main__':
     # You might want to run this with Flask's built-in server for development:
     # flask run
