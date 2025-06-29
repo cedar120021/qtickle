@@ -8,7 +8,7 @@
   ],
   "routes": [
     {
-      "src": "/api/create-checkout-session",
+      "src": "/create-checkout-session",
       "dest": "/main.py",
       "methods": ["POST", "OPTIONS"]
     }
