@@ -227,7 +227,7 @@ header {
     flex-shrink: 0; /* Prevent caption from shrinking too much */
 }
 
-/* Cart notification (toast) */
+/** Cart notification (toast) **/
 .cart-notification {
     position: fixed;
     top: 6rem; /* Position well below the header (approx 96px) */
