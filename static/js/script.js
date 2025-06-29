@@ -1,7 +1,7 @@
 // script.js
 
 // Initialize Stripe with your publishable key.
-// Replace 'YOUR_STRIPE_PUBLISHABLE_KEY' with your actual Stripe publishable key.
+// Replace 'pk_test_YOUR_PUBLISHABLE_KEY' with your actual Stripe publishable key.
 // You can find this in your Stripe Dashboard (Developers -> API keys).
 // For development, use a test publishable key (starts with pk_test_).
 const stripe = Stripe('pk_test_51ReT76CL22MlIYKBye392gwdQCuipAEusNp5wdJUUke0u6UyrorPKRTwDAZs6rsoNXgnHgStXuGjTUKO5xuVk7c6000Noc83Jt');
