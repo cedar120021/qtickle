@@ -10,8 +10,8 @@
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link data-n-head="ssr" rel="icon" href="assets/images/qtickle.ico" type="image/x-icon">
+    <link rel="stylesheet" href="static/css/style.css">
+    <link data-n-head="ssr" rel="icon" href="static/images/qtickle.ico" type="image/x-icon">
     <!-- Stripe.js v3 - REQUIRED for Stripe Checkout -->
     <script src="https://js.stripe.com/v3/"></script>
 </head>
@@ -25,13 +25,13 @@
         <div class="container mx-auto px-4 flex justify-between items-center">
             <!-- Logo/Site Title -->
             <a href="#"
-               class="text-3xl font-extrabold text-purple-600 hover:text-pink-500 transition-colors duration-300"><img src="assets/images/logo.png" alt="Qtickle Logo"></a>
+               class="text-3xl font-extrabold text-purple-600 hover:text-pink-500 transition-colors duration-300"><img src="static/images/logo.png" alt="Qtickle Logo"></a>
 
             <!-- Navigation (Desktop) -->
             <nav id="desktop-nav" class="hidden md:flex space-x-8">
                 <a href="#home" class="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-500 ease-in-out">
                     <span
-                            class="i nline-block transition-transform duration-200 ease-in-out transform hover:scale-110">Home</span>
+                            class="inline-block transition-transform duration-200 ease-in-out transform hover:scale-110">Home</span>
                 </a>
                 <a href="#products" class="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-500 ease-in-out">
                     <span
@@ -96,7 +96,7 @@
             </div>
             <div class="md:w-1/2 flex justify-center md:justify-end relative">
                 <!-- Placeholder Image -->
-                <img src="assets/images/qtickle_image.png" width="50%"
+                <img src="static/images/qtickle_image.png" width="50%"
                      alt="Qtickle Nail Oil Bottle" class="max-w-full h-auto rounded-3xl shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
             </div>
         </div>
@@ -218,16 +218,16 @@
                 <!-- Testimonial 1 -->
                 <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col items-center">
                     <div class="flex space-x-4">
-                            <img src="assets/images/kathryn_before_thumb.jpeg"
+                            <img src="static/images/kathryn_before_thumb.jpeg"
                                  alt="Kathryn Before"
                                  class="gallery-image"
-                                 data-large-src="assets/images/kathryn_before.jpeg"
+                                 data-large-src="static/images/kathryn_before.jpeg"
                                  data-caption="Katherine Nails Before Picture">
 
-                           <img src="assets/images/kathryn_after_thumb.jpeg"
+                           <img src="static/images/kathryn_after_thumb.jpeg"
                                 alt="Kathryn After"
                                  class="gallery-image"
-                                 data-large-src="assets/images/kathryn_after.jpeg"
+                                 data-large-src="static/images/kathryn_after.jpeg"
                                  data-caption="Katherine Nails After Picture">
                     </div>
                     <BR>
@@ -240,16 +240,16 @@
                 <!-- Testimonial 2 -->
                 <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col items-center">
                     <div class="flex space-x-4">
-                        <img src="assets/images/caitlin_before_thumb.jpeg"
+                        <img src="static/images/caitlin_before_thumb.jpeg"
                                  alt="Caitlin Before"
                                  class="gallery-image"
-                                 data-large-src="assets/images/caitlin_before.jpeg"
+                                 data-large-src="static/images/caitlin_before.jpeg"
                                  data-caption="Caitlin Nails Before Picture.">
 
-                           <img src="assets/images/caitlin_after_thumb.jpeg"
+                           <img src="static/images/caitlin_after_thumb.jpeg"
                                 alt="Caitlin After"
                                  class="gallery-image"
-                                 data-large-src="assets/images/caitlin_after.jpeg"
+                                 data-large-src="static/images/caitlin_after.jpeg"
                                  data-caption="Caitlin Nails After Picture.">
                     </div>
                     <BR>
@@ -261,16 +261,16 @@
                 <!-- Testimonial 3 -->
                 <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col items-center">
                     <div class="flex space-x-4">
-                            <img src="assets/images/liz_before_thumb.jpeg"
+                            <img src="static/images/liz_before_thumb.jpeg"
                                  alt="Liz Before"
                                  class="gallery-image"
-                                 data-large-src="assets/images/liz_before.jpeg"
+                                 data-large-src="static/images/liz_before.jpeg"
                                  data-caption="Liz Nails Before Picture.">
 
-                           <img src="assets/images/liz_after_thumb.jpeg"
+                           <img src="static/images/liz_after_thumb.jpeg"
                                 alt="Liz After"
                                  class="gallery-image"
-                                 data-large-src="assets/images/liz_after.jpeg"
+                                 data-large-src="static/images/liz_after.jpeg"
                                  data-caption="Liz Nails After Picture.">
                     </div>
                     <BR>
@@ -293,7 +293,7 @@
         <span class="prev-next-button" id="nextButton">&#10095;</span> </div>
     </section>
 
-    <div id="cartModal" class="modal">
+   <div id="cartModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeCartModal">&times;</span>
             <div class="modal-body">
@@ -382,23 +382,23 @@
                     <!-- Social Media Icons (placeholders) -->
                     <a href="#"
                        class="inline-block text-gray-300 hover:text-purple-400 transition-all duration-300 ease-in-out transform hover:scale-125">
-                        <img src="assets/images/social_facebook.png" width="30" height="30" alt="facebook" />
+                        <img src="static/images/social_facebook.png" width="30" height="30" alt="facebook" />
                     </a>
                     <a href="#"
                        class="inline-block text-gray-300 hover:text-purple-400 transition-all duration-300 ease-in-out transform hover:scale-125">
-                        <img src="assets/images/social_instagram.png" width="30" height="30" alt="instagram" />
+                        <img src="static/images/social_instagram.png" width="30" height="30" alt="instagram" />
                     </a>
                     <a href="#"
                        class="inline-block text-gray-300 hover:text-purple-400 transition-all duration-300 ease-in-out transform hover:scale-125">
-                        <img src="assets/images/social_youtube.png" width="30" height="30" alt="youtube" />
+                        <img src="static/images/social_youtube.png" width="30" height="30" alt="youtube" />
                     </a>
                     <a href="#"
                        class="inline-block text-gray-300 hover:text-purple-400 transition-all duration-300 ease-in-out transform hover:scale-125">
-                        <img src="assets/images/social_pinterest.png" width="30" height="30" alt="pinterest" />
+                        <img src="static/images/social_pinterest.png" width="30" height="30" alt="pinterest" />
                     </a>
                     <a href="#"
                        class="inline-block text-gray-300 hover:text-purple-400 transition-all duration-300 ease-in-out transform hover:scale-125">
-                        <img src="assets/images/social_tiktok.png" width="30" height="30" alt="tiktok" />
+                        <img src="static/images/social_tiktok.png" width="30" height="30" alt="tiktok" />
                     </a>
 
                 </div>
@@ -407,6 +407,6 @@
     </footer>
 
     <!-- Custom JavaScript -->
-    <script src="assets/js/script.js"></script>
+    <script src="static/js/script.js"></script>
 </body>
 </html>
