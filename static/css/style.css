@@ -257,8 +257,8 @@ header {
     right: 0;
     top: 0;
     height: 100%; /* Full height */
-    width: 380px; /* Fixed width for the sidebar */
-    max-width: 90vw; /* Responsive on smaller screens */
+    width: 100%; /* Make it full width on smaller screens */
+    max-width: 420px; /* Cap its max width for larger screens (e.g., tablet/desktop) */
     border-radius: 0; /* No rounded corners for sidebar effect */
     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2); /* Shadow on the left edge */
     animation: slideInRight 0.3s ease-out; /* New animation */
@@ -396,7 +396,7 @@ header {
 
 
 section[id] { /* Apply to all sections that have an ID (which are your scroll targets) */
-    scroll-margin-top: 7rem; /* Adjust this value based on your header's height */
+    scroll-margin-top: 5rem; /* Adjust this value based on your header's height */
     /* If your header is exactly 64px (h-16), 4rem (64px) might be perfect.
        5rem (80px) provides a bit more padding. Adjust as needed. */
 }
