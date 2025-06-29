@@ -367,8 +367,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Stripe Checkout Integration ---
-    // Dynamically get the origin (protocol, host, and port) of the current page.
-    const BACKEND_ORIGIN = window.location.origin;
+
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Local development backend URL
+        // Replace with the URL of your local Python Flask backend (e.g., 'http://127.0.0.1:4242')
+        BACKEND_ORIGIN = window.location.origin;
+    } else {
+        // Hosted (production) backend URL
+        // Replace with the actual URL Vercel provides after deployment (e.g., 'https://your-vercel-backend-url.vercel.app')
+        BACKEND_ORIGIN = 'https://qtickle.vercel.app';
+    }
+
     const CHECKOUT_SESSION_URL = `${BACKEND_ORIGIN}/create-checkout-session`;
 
     // Define SUCCESS_URL and CANCEL_URL.

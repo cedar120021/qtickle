@@ -1,2 +1,4 @@
 /pfi.html
 .env
+venv/
+venv_py311/
